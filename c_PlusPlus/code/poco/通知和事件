@@ -1,7 +1,10 @@
+
+
 1、POCO中与消息、事件相关的类如下：
     1)  同步通知实现：类Notification和NotificationCenter
     2)  异步通知实现：类Notification和NotificationQueue
     3)  事件 Events
+    
 2、Poco中的异步通知是通过NotificationQueue类来实现的，同它功能类似还有类PriorityNotificationQueue和TimedNotificationQueue。
   不同的是PriorityNotificationQueue类中对消息分了优先级，对优先级高的消息优先处理；而TimedNotificationQueue对消息给了时间戳，
   时间戳早的优先处理，而和其压入队列的时间无关。所以接下来我们主要关注NotificationQueue的实现。
@@ -158,8 +161,7 @@ private:
 }
   消费者线程首先从Notification对象的deque中获取消息，如果消息获取不为空，则直接返回处理，如果消息为空，则创建一个新的WaitInfo对象，
   并压入WaitInfo对象的  deque。 消费者线程开始等待，直到生产者通知有消息的存在，然后再从WaitInfo对象中取出消息，返回处理。
-  当消费者线程能从Notification对象的deque
-  中获取到消息时，说明消费者处理消息的速度要比生成者低；反之则说明消费者处理消息的速度要比生成者高。
+  当消费者线程能从Notification对象的deque中获取到消息时，说明消费者处理消息的速度要比生成者低；反之则说明消费者处理消息的速度要比生成者高。
 
 5、然后看下生产者的源代码
 void NotificationQueue::enqueueNotification(Notification::Ptr pNotification)

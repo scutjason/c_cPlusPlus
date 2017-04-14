@@ -1,0 +1,118 @@
+
+1、智能指针 AutoPtr 和 SharedPtr  ，可以不用关心堆上分配的内存的释放，类似于c#和java，因为内存的引用计数如果为0时会自动回收。
+
+2、AutoPtr
+先看一个例子：
+
+#include "Poco/RefCountedObject.h"  
+class A: public Poco::RefCountedObject  
+{  
+};  
+
+int main(int argc, char** argv)  
+{  
+     Poco::AutoPtr<A> p1(new A);  
+     A* pA = p1;  
+     // Poco::AutoPtr<A> p2(pA); // BAD! p2 assumes sole ownership  
+     Poco::AutoPtr<A> p2(pA, true); // Okay: p2 shares ownership with p1  
+     Poco::AutoPtr<A> p3;  
+     // p3 = pA; // BAD! p3 assumes sole ownership  
+     p3.assign(pA, true); // Okay: p3 shares ownership with p1  
+     return 0;  
+}
+
+RefCountedObjec是一个引用计数器类
+
+class Foundation_API RefCountedObject  
+    /// A base class for objects that employ  
+    /// reference counting based garbage collection.  
+    ///  
+    /// Reference-counted objects inhibit construction  
+    /// by copying and assignment.  
+{  
+public:  
+    RefCountedObject();  
+        /// Creates the RefCountedObject.  
+        /// The initial reference count is one.  
+  
+    void duplicate() const;  
+        /// Increments the object's reference count.  
+          
+    void release() const;  
+        /// Decrements the object's reference count  
+        /// and deletes the object if the count  
+        /// reaches zero.  
+          
+    int referenceCount() const;  
+        /// Returns the reference count.  
+  
+protected:  
+    virtual ~RefCountedObject();  
+        /// Destroys the RefCountedObject.  
+  
+private:  
+    RefCountedObject(const RefCountedObject&);  
+    RefCountedObject& operator = (const RefCountedObject&);  
+  
+    mutable AtomicCounter _counter;  
+}; 
+
+  RefCountedObject原来是一个引用计数对象，其中封装了原子计数类AtomicCounter。实现了两个接口，其中duplicate()用来增加引用计数数目，每次调用引用计数增加1；
+  release()用来减少引用计数数目，每次调用引用计数减少1.
+  
+3、使用规则
+ Poco::AutoPtr实现了一个引用计数对象的智能指针，能够实例化任何支持引用计数的类。符合下列要求的类可以被定义成为支持引用计数：
+    1. 这个类必须存在引用计数，在对象被创建时，引用计数被初始化值为1
+    2. 这个类必须支持duplicate()接口增加引用计数
+    3. 这个类必须支持release()接口减少引用计数，并且在引用计数为0时，删除类对象。
+
+    Poco::AutoPtr的操作符合1.2节中对于“对象所有权(Object Ownership)”的描述：
+    1. 当AutoPtr<C>从原生指针C*构造时，AutoPtr获取到对象C的所有权(对象的引用计数为1，保持不变)。
+    2. 当使用赋值操作符“=”把原生指针C*赋予AutoPtr<C>时，AutoPtr 获取到对象C的所有权（新对象的引用计数保持不变）。下面是AutoPtr关于这个实现：
+
+      AutoPtr& assign(C* ptr)  
+      {  
+          if (_ptr != ptr)  
+          {  
+              if (_ptr) _ptr->release();  
+              _ptr = ptr;  
+          }  
+          return *this;  
+      }  
+
+      AutoPtr& operator = (C* ptr)  
+      {  
+          return assign(ptr);  
+      }
+
+      3. 当AutoPtr<C>从另一AutoPtr<C>构造时，两个AutoPtr共享一个C的拥有权，引用计数增加
+      4. 当使用赋值操作符“=”把AutoPtr<C>赋予另一个AutoPtr<C>时，两个AutoPtr 共享一个C的拥有权，引用计数增加
+      
+4、与原生指针的转换
+当使用赋值操作符“=”把一个AutoPtr赋给一个原生指针，然后再把这个原生指针赋予另个AutoPtr时要非常小心。
+这时候两个AutoPtr'都会声称拥有对象的所有权。这是非常坏的一件事情。必须明确的告知AutoPtr需要分享对象的所有权。
+使用下列两个函数可以解决问题：
+AutoPtr::AutoPtr(C* pObject, bool shared);  
+AutoPtr& AutoPtr::assign(C* pObject, bool shared); 其中shared值必须为true。
+
+举例：
+#include "Poco/AutoPtr.h"  
+#include "Poco/RefCountedObject.h"  
+class A: public Poco::RefCountedObject  
+{  
+};  
+  
+int main(int argc, char** argv)  
+{  
+         Poco::AutoPtr<A> p1(new A);  
+         A* pA = p1;  
+         // Poco::AutoPtr<A> p2(pA);             // BAD! p2 assumes sole ownership  
+         Poco::AutoPtr<A> p2(pA, true);          // Okay: p2 shares ownership with p1  
+         Poco::AutoPtr<A> p3;  
+         // p3 = pA;                             // BAD! p3 assumes sole ownership  
+         p3.assign(pA, true);                    // Okay: p3 shares ownership with p1  
+         return 0;  
+} 
+
+
+

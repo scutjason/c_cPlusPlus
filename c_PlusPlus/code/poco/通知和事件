@@ -1,0 +1,251 @@
+1、POCO中与消息、事件相关的类如下：
+    1)  同步通知实现：类Notification和NotificationCenter
+    2)  异步通知实现：类Notification和NotificationQueue
+    3)  事件 Events
+2、Poco中的异步通知是通过NotificationQueue类来实现的，同它功能类似还有类PriorityNotificationQueue和TimedNotificationQueue。
+  不同的是PriorityNotificationQueue类中对消息分了优先级，对优先级高的消息优先处理；而TimedNotificationQueue对消息给了时间戳，
+  时间戳早的优先处理，而和其压入队列的时间无关。所以接下来我们主要关注NotificationQueue的实现。
+  
+3、首先看一下NotificationQueue类的定义
+  class Foundation_API NotificationQueue
+	/// A NotificationQueue object provides a way to implement asynchronous
+	/// notifications. This is especially useful for sending notifications
+	/// from one thread to another, for example from a background thread to 
+	/// the main (user interface) thread. 
+	/// 
+	/// The NotificationQueue can also be used to distribute work from
+	/// a controlling thread to one or more worker threads. Each worker thread
+	/// repeatedly calls waitDequeueNotification() and processes the
+	/// returned notification. Special care must be taken when shutting
+	/// down a queue with worker threads waiting for notifications.
+	/// The recommended sequence to shut down and destroy the queue is to
+	///   1. set a termination flag for every worker thread
+	///   2. call the wakeUpAll() method
+	///   3. join each worker thread
+	///   4. destroy the notification queue.
+{
+public:
+	NotificationQueue();
+		/// Creates the NotificationQueue.
+
+	~NotificationQueue();
+		/// Destroys the NotificationQueue.
+
+	void enqueueNotification(Notification::Ptr pNotification);
+		/// Enqueues the given notification by adding it to
+		/// the end of the queue (FIFO).
+		/// The queue takes ownership of the notification, thus
+		/// a call like
+		///     notificationQueue.enqueueNotification(new MyNotification);
+		/// does not result in a memory leak.
+		
+	void enqueueUrgentNotification(Notification::Ptr pNotification);
+		/// Enqueues the given notification by adding it to
+		/// the front of the queue (LIFO). The event therefore gets processed
+		/// before all other events already in the queue.
+		/// The queue takes ownership of the notification, thus
+		/// a call like
+		///     notificationQueue.enqueueUrgentNotification(new MyNotification);
+		/// does not result in a memory leak.
+
+	Notification* dequeueNotification();
+		/// Dequeues the next pending notification.
+		/// Returns 0 (null) if no notification is available.
+		/// The caller gains ownership of the notification and
+		/// is expected to release it when done with it.
+		///
+		/// It is highly recommended that the result is immediately
+		/// assigned to a Notification::Ptr, to avoid potential
+		/// memory management issues.
+
+	Notification* waitDequeueNotification();
+		/// Dequeues the next pending notification.
+		/// If no notification is available, waits for a notification
+		/// to be enqueued. 
+		/// The caller gains ownership of the notification and
+		/// is expected to release it when done with it.
+		/// This method returns 0 (null) if wakeUpWaitingThreads()
+		/// has been called by another thread.
+		///
+		/// It is highly recommended that the result is immediately
+		/// assigned to a Notification::Ptr, to avoid potential
+		/// memory management issues.
+
+	Notification* waitDequeueNotification(long milliseconds);
+		/// Dequeues the next pending notification.
+		/// If no notification is available, waits for a notification
+		/// to be enqueued up to the specified time.
+		/// Returns 0 (null) if no notification is available.
+		/// The caller gains ownership of the notification and
+		/// is expected to release it when done with it.
+		///
+		/// It is highly recommended that the result is immediately
+		/// assigned to a Notification::Ptr, to avoid potential
+		/// memory management issues.
+
+	void dispatch(NotificationCenter& notificationCenter);
+		/// Dispatches all queued notifications to the given
+		/// notification center.
+
+	void wakeUpAll();
+		/// Wakes up all threads that wait for a notification.
+	
+	bool empty() const;
+		/// Returns true iff the queue is empty.
+		
+	int size() const;
+		/// Returns the number of notifications in the queue.
+
+	void clear();
+		/// Removes all notifications from the queue.
+		
+	bool hasIdleThreads() const;	
+		/// Returns true if the queue has at least one thread waiting 
+		/// for a notification.
+		
+	static NotificationQueue& defaultQueue();
+		/// Returns a reference to the default
+		/// NotificationQueue.
+
+protected:
+	Notification::Ptr dequeueOne();
+	
+private:
+	typedef std::deque<Notification::Ptr> NfQueue;
+	struct WaitInfo
+	{
+		Notification::Ptr pNf;
+		Event             nfAvailable;
+	};
+	typedef std::deque<WaitInfo*> WaitQueue;
+
+	NfQueue           _nfQueue;
+	WaitQueue         _waitQueue;
+	mutable FastMutex _mutex;
+};
+
+  从定义可以看到NotificationQueue类管理了两个deque容器。其中一个是WaitInfo对象的deque，另一个是Notification对象的deque。
+  而WaitInfo一对一的对应了一个消息对象pNf和事件对象nfAvailable，毫无疑问Event对象是用来同步多线程的。让我们来看看它如何实现。         
+  NotificationQueue实现的巧妙之处就在于WaitInfo由消费者动态创建，消费者线程通过函数Notification* waitDequeueNotification()获取消息
+  
+4、在看一下消费者的源代码
+  Notification::Ptr NotificationQueue::dequeueOne()
+{
+	Notification::Ptr pNf;
+	if (!_nfQueue.empty())
+	{
+		pNf = _nfQueue.front();
+		_nfQueue.pop_front();
+	}
+	return pNf;
+}
+
+  Notification* NotificationQueue::waitDequeueNotification()
+{
+	Notification::Ptr pNf;
+	WaitInfo* pWI = 0;
+	{
+		FastMutex::ScopedLock lock(_mutex);
+		pNf = dequeueOne();
+		if (pNf) return pNf.duplicate();
+		pWI = new WaitInfo;
+		_waitQueue.push_back(pWI);
+	}
+	pWI->nfAvailable.wait();
+	pNf = pWI->pNf;
+	delete pWI;
+	return pNf.duplicate();
+}
+  消费者线程首先从Notification对象的deque中获取消息，如果消息获取不为空，则直接返回处理，如果消息为空，则创建一个新的WaitInfo对象，
+  并压入WaitInfo对象的  deque。 消费者线程开始等待，直到生产者通知有消息的存在，然后再从WaitInfo对象中取出消息，返回处理。
+  当消费者线程能从Notification对象的deque
+  中获取到消息时，说明消费者处理消息的速度要比生成者低；反之则说明消费者处理消息的速度要比生成者高。
+
+5、然后看下生产者的源代码
+void NotificationQueue::enqueueNotification(Notification::Ptr pNotification)
+{
+	poco_check_ptr (pNotification);
+	FastMutex::ScopedLock lock(_mutex);
+	if (_waitQueue.empty())
+	{
+		_nfQueue.push_back(pNotification);
+	}
+	else
+	{
+		WaitInfo* pWI = _waitQueue.front();
+		_waitQueue.pop_front();
+		pWI->pNf = pNotification;
+		pWI->nfAvailable.set();
+	}	
+}
+
+生产者线程首先判断WaitInfo对象的deque是否为空，如果不为空，说明存在消费者线程等待，则从deque中获取一个WaitInfo对象，灌入Notification消息，
+释放信号量激活消费者线程；而如果为空，说明目前说有的消费者线程都在工作，则把消息暂时存入Notification对象的deque，等待消费者线程有空时处理。         
+整个处理过程中对于_mutex对象的处理是非常小心的，_waitQueue不被使用则释放。OK，整个流程结束，消息源和目标被解耦。
+
+6、异步的例子：
+ 
+#include "Poco/Notification.h"
+#include "Poco/NotificationQueue.h"
+#include "Poco/ThreadPool.h"
+#include "Poco/Runnable.h"
+#include "Poco/AutoPtr.h"
+using Poco::Notification;
+using Poco::NotificationQueue;
+using Poco::ThreadPool;
+using Poco::Runnable;
+using Poco::AutoPtr;
+class WorkNotification: public Notification
+{
+public:
+	WorkNotification(int data): _data(data) {}
+	int data() const
+	{
+		return _data;
+	}
+private:
+	int _data;
+};
+
+
+class Worker: public Runnable
+{
+public:
+	Worker(NotificationQueue& queue): _queue(queue) {}
+	void run()
+	{
+		AutoPtr<Notification> pNf(_queue.waitDequeueNotification());
+		while (pNf)
+		{
+			WorkNotification* pWorkNf =
+				dynamic_cast<WorkNotification*>(pNf.get());
+			if (pWorkNf)
+			{
+				// do some work
+			}
+			pNf = _queue.waitDequeueNotification();
+		}
+	}
+private:
+	NotificationQueue& _queue;
+};
+
+
+int main(int argc, char** argv)
+{
+	NotificationQueue queue;
+	Worker worker1(queue); // create worker threads
+	Worker worker2(queue);
+	ThreadPool::defaultPool().start(worker1); // start workers
+	ThreadPool::defaultPool().start(worker2);
+	// create some work
+	for (int i = 0; i < 100; ++i)
+	{
+		queue.enqueueNotification(new WorkNotification(i));
+	}
+	while (!queue.empty()) // wait until all work is done
+		Poco::Thread::sleep(100);
+	queue.wakeUpAll(); // tell workers they're done
+	ThreadPool::defaultPool().joinAll();
+	return 0;
+}

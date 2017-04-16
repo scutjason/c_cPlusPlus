@@ -1,0 +1,82 @@
+
+1、CMake介绍
+CMake是一个跨平台的安装(编译)工具,可以用简单的语句来描述所有平台的安装(编译过程)。
+通过编写CMakeLists.txt，可以控制生成的Makefile，从而控制编译过程。
+它并不直接生成可执行文件，而是生成Makefile。
+
+2、CMakeLists.txt 
+CMake的所有的语句都写在一个叫:CMakeLists.txt的文件中。CMakeLists.txt可以看做是cmake的工程文件
+当CMakeLists.txt文件确定后,可以用ccmake命令对相关的变量值进行配置。这个命令必须指向CMakeLists.txt所在的目录。
+配置完成之后,应用cmake命令生成相应的makefile（在Unix like系统下）或者 project文件（指定用window下的相应编程工具编译时）。
+
+3、文件格式：
+cmake_minimum_required(VERSION 2.8.12) 最低cmake版本要求
+project(HELLO)  项目名称
+set(CMAKE_CXX_STANDARD 11) 设置CMAKE_CXX_STANDARD 编译器为c++ 11 标准
+set(CMAKE_BUILD_TYPE Debug) 设置编译类型为debug
+set(SRC_LIST main.c) 赋值当前目录（CMakeList.txt所在的目录）下的SRC_LIST为main.c
+add_subdirectory(3rdparty/libssh2) 添加子目录
+add_executable(hello ${SRC_LIST}) 可执行文件的生成目录
+
+add_library(Hello hello.cxx)  #将hello.cxx编译成静态库如libHello.a
+target_link_libraries(hello libhello)  添加链接库  类似gcc -l 
+set_target_properties(libhello PROPERTIES OUTPUT_NAME "hello") 设置目标文件的属性，包括前缀、后缀、版本号、库名字。
+
+
+# 为注释
+变量：使用set命令显式定义及赋值，在非if语句中，使用${}引用，if中直接使用变量名引用；后续的set命令会清理变量原来的值
+支持if 循环
+
+4、目录结构
+编译时，先建立一个任意目录（比如本目录下创建一个build子目录），在该build目录下调用cmake
++
+| 
++--- main.c
++--- CMakeList.txt
+|
+/--+ build/
+   |
+   +--- hello.exe
+   
+   
+5、执行
+在build目录下运行 $cmake 目录
+$ cd hello/build/
+$ cmake .. 表示CMakeLists.txt在父目录下，编译结果放到build目录
+$ make  生成目标文件
+
+6、多层目录结构
++
+|
++--- CMakeList.txt
++--+ src/
+|  |
+|  +--- main.c
+|  /--- CMakeList.txt
+|
++--+ libhello/
+|  |
+|  +--- hello.h
+|  +--- hello.c
+|  /--- CMakeList.txt
+|
+/--+ build/
+
+1）顶层的CMakeList.txt 文件
+project(HELLO)
+add_subdirectory(src)
+add_subdirectory(libhello)
+
+2）src 中的 CMakeList.txt 文件
+include_directories(${PROJECT_SOURCE_DIR}/libhello)
+set(APP_SRC main.c)
+add_executable(hello ${APP_SRC})
+target_link_libraries(hello libhello)
+
+3）libhello 中的 CMakeList.txt 文件
+set(LIB_SRC hello.c)
+add_library(libhello ${LIB_SRC})
+set_target_properties(libhello PROPERTIES OUTPUT_NAME "hello")
+
+顶层的 CMakeList.txt 文件中使用 add_subdirectory 告诉cmake去子目录寻找新的CMakeList.txt 子文件
+在 src 的 CMakeList.txt 文件中，新增加了include_directories，用来指明头文件所在的路径。

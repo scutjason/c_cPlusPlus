@@ -1,0 +1,73 @@
+1、static_cast 标准转换运算符
+  用法 static_cast<size_t>(read_size)  将read_size转换成size_t类型
+
+2、父类强转成子类直接用()
+  比如： (Session *)Message   Message是父类、Session是继承类
+  
+3、关于new  对象名后面不需要加括号，如果不需要输入构造参数
+   比如 tIpdrFilterContext *context = new tIpdrFilterContext;
+   如果你需要输入构造入参，那可以这样写，比如，克隆一个对象 
+   IPDRXDRlog *ipdr_xdr_entry = new IPDRXDRlog();
+   IPDRXDRlog *clone = new IPDRXDRlog(*ipdr_xdr_entry);
+   
+ 4、__sync_add_and_fetch linux无锁化
+ 
+ 5、std::string、std::vector和std::map 如果直接赋值的话是整个对象全部赋值，=号重定向了
+ 
+ 6、stringstream 与 string
+    stringstream是字符串流，同ostream、 iostream、 fstream类似。可以用<< 来输入，用clear()来清除流，用str来转换成string
+    string是字符串
+    比如 std::string _path;
+         std::stringstream path;
+         path << "hello" << "string";
+        _path = path.str();
+        
+  7、引用 &   函数参数名前面的&，表示传入为引用。 out作为出参，在函数体内改变了，那么函数调用完毕后task_id的值也会改变
+    std::string task_id;
+    bool find_match(std::string &str, std::string &out)
+    {
+        bool ret = false;
+        for(int i = 0; i < size; i++)
+        {
+            if(flter.get_field()== str)
+            {
+                ret =  true;
+                out = flter.get_id();
+                break;
+            }
+        }
+        return ret;
+    }
+
+8、转字符串 std::to_string(size)
+   转数字   std::stoi(monitor_type)
+   字符串宽度  std::setw(10)
+   补零 std::setfill('0')
+   
+9、字符串split 
+   std::string local_file_name = "01-001-2015-2016.tar.gz"
+   StringTokenizer fields(local_file_name, "-");
+   fields[0] 是"01"
+  
+10、单例对象 和 静态成员变量一回事。就是在成员变量前加入static
+class Queque                                                
+{                                                          
+public:                                                   
+     Queque()                                            
+    {                                                      
+    };                                                     
+    ~Queque()                                               
+    {                                                      
+    };                                                                                                
+    static uint16 Instance;    // Instance是静态全局的  
+};
+
+11、vector
+  std::vector<FileWriter *>
+  
+12、map
+typedef std::map<std::string, AccountMonitor *> tMonitorMap;
+
+  
+  
+  

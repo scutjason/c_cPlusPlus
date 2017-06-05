@@ -64,9 +64,14 @@ public:
 
 11、vector
   std::vector<FileWriter *>
+  std::vector<Filter>::iterator it = g_filter_msisdn.filter_items.begin()+i;
+  g_filter_msisdn.filter_items.erase(it);
   
 12、map
 typedef std::map<std::string, AccountMonitor *> tMonitorMap;
+tMonitorMap::iterator item = monitor_terms.find(account);
+safe_delete(item->second);
+monitor_terms.erase(item);
 
   
   

@@ -17,6 +17,7 @@ solution one
 
 //  利用了max 函数作比较，程序简洁
 // 不过执行效率并不高，耗时38 ms 只击败了 40%的人
+// 它的思想是，利用start变量来保存已经遍历过的子串，然后跟着i一起走
 
 class Solution {
 public:

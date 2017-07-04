@@ -30,6 +30,7 @@ public:
         {
             if(hash.count(s[i]) != 0)
             {
+                // 这个max 是为了让start一致保持在最靠近i的位置，因为可能搜索到多个
                 start = max(start, hash[s[i]]);
             }
             hash[s[i]] = i;

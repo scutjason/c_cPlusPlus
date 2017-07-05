@@ -43,3 +43,71 @@ public:
     }
 };
 
+-----------
+solution two
+-----------
+// 把 for循环里的长度判断提到循环体外，能提升到31ms
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+ 
+        map<char,int> hash;
+        int start = -1;
+        int max_len = 0;
+        int len = s.length();
+        
+        for(int i = 0; i < len; i++)
+        {
+            int c = s[i];
+            if(hash.count(c) != 0)
+            {
+                //start = max(start, hash[s[i]]);
+                if(start < hash[c])
+                {
+                    start = hash[c];
+                }
+            }
+            hash[c] = i;
+            if(max_len < i - start)
+            {
+                max_len = i - start;
+            }            //max_len = max(max_len, i - start);
+            
+        }
+        return max_len;
+    }
+};
+
+------------
+solution three
+------------
+// 同样的思想用c代码实现，效率提升了一倍
+int lengthOfLongestSubstring(char* s) {
+    int max_len = 0;
+    int start = -1;
+    int i = 0;
+    int arr[256] = {-1};
+    
+    memset(arr, -1, sizeof(arr));
+    int len = strlen(s);
+    
+    for(i = 0; i < len; i++)
+    {
+        int c = s[i];
+        if(arr[c] != -1)
+        {
+            if(start < arr[c])
+            {
+                start = arr[c];
+            }
+        }
+        
+        if(max_len < i - start)
+        {
+            
+            max_len = i - start;
+        }
+        arr[c] = i;
+    }
+    return max_len;
+}

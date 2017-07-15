@@ -20,7 +20,681 @@
 
 
 2、7种查找算法
+查找：根据给定的某个值，在查找表中确定一个其关键字等于给定值的数据元素（或记录）。
 
+（1）、顺序查找：顺序查找也称为线形查找，属于无序查找算法。从数据结构线形表的一端开始，顺序扫描，依次将扫描到的结点关键字与给定值k相比较，
+                若相等则表示查找成功；若扫描结束仍没有找到关键字等于k的结点，表示查找失败。
+    顺序查找适合于存储结构为顺序存储或链接存储的线性表。
+    复杂度为O(x)
+    
+    int SequenceSearch(int a[], int value, int n)
+    {
+        int i;
+        
+        for(i = 0; i < n; i++)
+        {
+            if(a[i] == value)
+                return i;
+        }
+        return -1;
+    }
+    
+（2）、二分查找：也称为是折半查找，属于有序查找算法。用给定值k先与中间结点的关键字比较，中间结点把线形表分成两个子表，
+        若相等则查找成功；若不相等，再根据k与该中间结点关键字的比较结果确定下一步查找哪个子表，这样递归进行，
+        直到查找到或查找结束发现表中没有这样的结点。、
+    
+    比较次数为log2(n+1)
+    折半查找的前提条件是需要有序表顺序存储。动态查找不建议使用（对序列要插入和删除）
+    
+    
+    // 迭代版本
+    int BinarySearch(int a[], int value, int n)
+    {
+        int low , int high, int mid;
+        low = 0;
+        high = n-1;
+        
+        while(low <= high)
+        {
+            mid = （low + high)/2;
+            
+            if(a[mid] == value)
+            {
+                return mid;
+            }
+            else if(a[mid] > value)
+            {
+                high = mid-1;
+            }
+            else if(a[mid] < value)
+            {
+                low = mid+1;
+            }
+        }
+        return -1;
+    }
+    
+    //递归版本
+    int BinarySearch(int a[], int value, int low, int high)
+    {
+        int mid;
+        mid = （low + high)/2;
+        if(a[mid] == value)
+        {
+            return mid;
+        }
+        else if(a[mid] > value)
+        {
+            return BinarySearch(a,value,low,mid-1);
+        }
+        else if(a[mid] < value)
+        {
+            return BinarySearch(a,value,mid+1,high);
+        }
+        
+    }
+    
+
+（3）、插值查找：折半查找不是自适应的，是傻瓜式的。举个例子，字典中查apple，肯定是翻前面的页的效率高。
+
+    二分查找中查找点计算如下：
+　　mid=(low+high)/2, 即mid=low+1/2*(high-low);
+　　通过类比，我们可以将查找的点改进为如下：
+　　mid=low+(key-a[low])/(a[high]-a[low])*(high-low)，
+　　也就是将上述的比例参数1/2改进为自适应的，根据关键字在整个有序表中所处的位置，
+    让mid值的变化更靠近关键字key，这样也就间接地减少了比较次数。
+    
+    插值查找也是有序查找。
+    
+    不过，数组中如果分布非常不均匀，那么插值查找未必是很合适的选择。
+    
+    int InsertionSearch(int a[], int value, int low, int high)
+    {
+        int mid = low + (value - a[low])/(a[high] - a[low]) *(high - low);
+        if(a[mid] == value)
+        {
+            return mid;
+        }
+        else if(a[mid] > value)
+        {
+            return InsertionSearch(a,value,low,mid-1);
+        }
+        else if(a[mid] < value)
+        {
+            return InsertionSearch(a,value,mid+1,high);
+        }
+        
+    }
+    
+    
+（4）、斐波那契查找：黄金比例，较大部分与较小部分之比等于整体与较大部分之比，其比值约为1:0.618或1.618:1。
+        斐波那契数列：1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89…….（从第三个数开始，后边每一个数都是前两个数的和）。
+        然后我们会发现，随着斐波那契数列的递增，前后两个数的比值会越来越接近0.618
+        
+        有序查找
+
+        
+（5）、二叉树查找
+    二叉查找树（BinarySearch Tree，也叫二叉搜索树，或称二叉排序树Binary Sort Tree）或者是一棵空树，或者是具有下列性质的二叉树：
+
+　　1）若任意节点的左子树不空，则左子树上所有结点的值均小于它的根结点的值；
+
+　　2）若任意节点的右子树不空，则右子树上所有结点的值均大于它的根结点的值；
+
+　　3）任意节点的左、右子树也分别为二叉查找树。
+
+
+（5）、1 平衡二叉树 AVL
+    可以是空树。
+    假如不是空树，任何一个结点的左子树与右子树都是平衡二叉树，并且高度之差的绝对值不超过1
+    平衡因子：左子树的高度减去右子树的高度。
+    
+    
+（5）、2 红黑树
+    红黑树的特性:
+    （1）每个节点或者是黑色，或者是红色。
+    （2）根节点是黑色。
+    （3）每个叶子节点（NIL）是黑色。 [注意：这里叶子节点，是指为空(NIL或NULL)的叶子节点！]
+    （4）如果一个节点是红色的，则它的子节点必须是黑色的。
+    （5）从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+    
+
+
+（6）、分块查找
+    将n个元素分成m快，每个块中不必有序，但是块与块之间必须有序
+
+（7）、哈希查找
+    按照关键字为每一个元素"分类"，然后将这个元素存储在相应"类"所对应的地方。
+    不能够保证每个元素的关键字与函数值是一一对应的，因此极有可能出现对于不同的元素，这样就产生了"冲突"
+    
+    "直接定址"与"解决冲突"是哈希表的两大特点。
+    
+    
 3、8种排序算法
+（1）、直接插入排序：选取一个基数，序列中的每个数都与基数比较，小于基数时插入到它前面的合适位置，大于基数时不动。
+                    要将所有在i前面的大于i的数都往后挪一下。
+                稳定算法
+                复杂度 O n^2
+            
+    --------
+    c
+    --------
+    void InsertSort(int a[], int size)
+    {
+        int i, j;
+        int tmp;
+        
+        for(i = 1; i < size; i++)
+        {
+            tmp = a[i]; // 这个a[i]要被前面大于a[i]的数所替代，所以要保留它
+            for(j = i; j > 0; j--)
+            {
+                if(tmp < a[j-1])
+                {
+                    a[j] = a[j-1];
+                }
+                else
+                {
+                    break;
+                }
+            }
+            a[j] = tmp;  
+        }
+    }
+    
+    ---------
+    c++
+    ---------
+    template <typename T>
+    void InsertSort(T a[], int size)
+    {
+        int i, j;
+        int tmp;
+        
+        for(i = 1; i < size; i++)
+        {
+            tmp = a[i]; // 这个a[i]要被前面大于a[i]的数所替代，所以要保留它
+            for(j = i; j > 0; j--)
+            {
+                if(tmp < a[j-1])
+                {
+                    a[j] = a[j-1];
+                }
+                else
+                {
+                    break;
+                }
+            }
+            a[j] = tmp;  
+        }
+    }
+    
+（1）.1 二分插入排序，二分法是基于已经排序的基础上在进行折半搜索，所以平均算法要快 
+    我们需要加入一个函数专门用于找到插入的位置。这个函数用递归方法实现。
+    
+    查找的思想是 http://blog.csdn.net/lg1259156776/article/details/48686907
+    
+    // 写迭代的话，可以先写一般情况，
+    // 比如二分查找， 一般情况是:
+    // 用item与low和high的中间值mid做比较。如果item > a[mid],那么说明要找的值就在[low , mid -1]中间，否则在[mid +1，high]之间。
+    // 然后继续迭代
+    
+    int BinarySearch(int a[], int item, int low, int high)
+    {
+        // 1 我们定义一个mid
+        // 另外之前关于第几个数和数组索引总是想不清。
+        // 这里给个技巧。在迭代函数中，统一按第几个数就好了。第几个数与索引i总是相差1的
+        
+        int mid = (low + high)/2;
+        
+        // 3 写边界值，也就是迭代结束的情况，这里有两个，1、如果刚好等于中间值，那就表示找到了，对吧，以为前面的值肯定都比它小。2、也许会一直比较中间值
+        //  终点就是 low >= high
+        // 先写第一种情况
+        if(item == a[mid]){
+            reurn mid+1;
+        }
+        
+        // 然后写第二种情况, 这里我们用了大于等于。我们比较了item与low，如果item比low大，那么就去low+1;否则取low（放在low的位置）
+        if(low >= high){
+            return (item > a[low])? (low + 1): low;
+        }
+        
+        // 2 写迭代主体
+        if(item < a[mid]){
+            // 你看这里的mid，虽然是第几个数，但是mid-1仍表示它前面的那个数。mid已经比较过了，就无需比较
+            // 如果item < a[mid] ，表示item应该插入到low和mid-1之间
+            return BinarySearch(a, item, low, mid-1);
+        }else{
+            return BinarySearch(a, item, mid+1, high);
+        }
+    }
+    
+    // 插入排序的算法也需要稍作修改，因为我们找到了插入的位置。所以就只需要将插入位置后面的所有元素都往后移
+    
+    void InsertSort(int a[], int size)
+    {
+        int i, j ,pos;
+        int item；
+        
+        for(i = 1; i < size; i++)
+        {
+            // 这个j表示item前面的high位置
+            item = a[i];
+            j = i -1;
+            
+            // 求一下要插入的位置pos . 这个pos表示索引值
+            pos = BinarySearch(a, item, 0, j);
+            
+            // 得到位置pos之后，就开始移动元素
+            for(; j >=pos; j--)
+            {
+                a[j+1] = a[j];
+            }
+            a[j+1] = tmp;
+        }
+    }
+    
+    
+（2）、希尔排序：对直接插入排序做了较大的修改，又称缩小增量排序。
+
+    基本思想：先将整个待排序的记录序列分割成为若干子序列分别进行直接插入排序，待整个序列中的记录“基本有序”时，再对全体记录进行依次直接插入排序。
+    
+    一般选取增量序列d = {n/2 ,n/4, n/8 .....1} n为要排序数的个数
+    
+    不稳定排序
+    
+    算法复杂度 不好计算
+    
+    --------
+    c
+    --------
+    void ShellSort(int a[], int n)
+    {
+        
+        int tmp;
+        int i, j, k;
+        
+        // i 表示增量序列，最终递减为1
+        for(i = n /2; i > 0; i /=2)
+        {
+            // j 表示对于每一个增量，能往后移的次数。  n - j次
+            for(j = i; j < n; j++)
+            {
+                tmp = a[j];
+                k = j;
+                // k 表示对于每个增量，在不移动的基础上，做排序，a[k], a[k + i], a[k + 2*2]
+                for(; k >= i && tmp  < a[k - i]; k -= i)
+                {
+                    a[k] = a[k - i];
+                }
+                
+                a[k] = tmp;
+            }
+        }
+    }
+    
+    --------
+    c 用迭代法, 把第一个for循环拆成迭代
+    --------
+    
+    void ShellInsert(int a[], int n, int gap)
+    {
+        int j = gap;
+        
+        for(j = gap; j < n; j++)
+        {
+            int tmp = a[j];
+            int k = j;
+            
+            for(; k >= gap && tmp  < a[k - gap]; k -= gap)
+            {
+                a[k] = a[k - gap];
+            }
+            
+            a[k] = tmp;
+        }
+    }
+    
+    
+    void ShellSort(int a[], int n)
+    {
+
+        int i = n/2;
+                
+        while(i > 0)
+        {
+            ShellInsert(a, n, i);
+            i /= 2;
+        }
+    }
+    
+    
+（3）、选择排序 ： 从数组中选择最小的数放到第一个位置，然后从剩下的数中在选择最小的数放到第二个位置。直到最后
+        O(n2)
+        不稳定排序
+
+（3）、1 简单选择排序：
+
+    --------
+    c
+    --------
+    void SampleSelectionSort(int a[], int n)
+    {
+        int i, j ;
+        
+        int tmp;
+        int loc;
+        
+        for(i = 0; i < n-1; i++)
+        {
+            loc = i;
+            for(j = i+1; j < n; j++)
+            {
+                if(a[j] < a[i])
+                {
+                    loc = j;
+                }
+            }
+            if(loc != i)
+            {
+                tmp = a[i];
+                a[i] = a[loc];
+                a[loc] = tmp;
+            }
+        }
+    }
+    
+（3）、2 二元选择排序   对选择排序做一个改进，每次选择出最大和最小的两个数的位置，进行替换, 最多只需 n/2趟
+
+    --------
+    c
+    --------
+    void SampleSelectionSort(int a[], int n)
+    {
+        int i, j;
+        
+        int tmp;
+        
+        int min, max;
+        
+        for(i = 0; i < n/2; i++)
+        {
+            min = max = i;
+            
+            for(j = i+1; j < n-i; j++)
+            {
+                if(a[j] < a[i])
+                {
+                    min = j;
+                }
+                else
+                {
+                    max = j;
+                }
+            }
+            
+            tmp = a[i];
+            a[i] = a[min];
+            a[min] = tmp;
+            
+            tmp = a[i];
+            a[i] = a[max];
+            a[max] = tmp;  
+        }
+    }
+    
+
+（4）、堆排序 ： 树形排序，堆直接选择排序的改进。最大堆（最小堆）：父节点比他的子节点要大（小）。这样堆顶元素就是最大值（最小值）.
+             堆排序需要分两步走，1、建立堆。 2、将堆顶的元素移除堆，堆底的元素替换到堆顶
+    
+    稳定排序
+    NlogN
+    
+    --------
+    c  最大堆
+    -------- 
+    
+    
+    int LeftChild(int i)
+    {
+        return 2 * i +1;
+    }
+    
+    /**
+        对于完全二叉堆，左节点为 2 * i +1  右节点为 (2 + i)*2
+        i结点的父结点下标就为(i – 1) / 2
+        
+        n 个结点的完全二叉树，则最后一个结点是第[n/2]个结点的子树。
+        
+        调堆的过程应该从最后一个非叶子节点开始, 最后一个左叶子节点为 n/2
+        
+        http://shmilyaw-hotmail-com.iteye.com/blog/1775868
+    **/
+    
+    // 
+    void BuildHeap(int a[], int i, int n)
+    {
+        int child;
+        int tmp;
+        
+        // 2 * i + 1 表示左子节点
+        for( tmp = a[i]; LeftChild(i) < n; i = child)
+        {
+            child = LeftChild(i);
+            if(child != n -1 && a[child] < a[child + 1])
+            {
+                child++; // 右子节点
+            }
+            if(tmp < a[child])
+            {
+                a[i] = a[child];
+            }
+            else
+            {
+                break;
+            }
+        }
+        a[i] = tmp;
+    }
+    
+    void HeadSort(int a[], int n)
+    {
+        int i, j, tmp;
+        
+        // 建立堆的过程，1、从最后一个非叶子节点开始 n/2 -1（下标为0），2、从下往上进行
+        
+        for(i = n/2 -1; i >= 0; i--)
+        {
+            BuildHeap(a, i, n);
+        }
+        
+        for(j = n-1; j > 0; j--)
+        {
+            // a[0]是最大的元素，堆顶。将a[0]跟最后一个节点交换，即从堆顶移除。
+            tmp = a[0];
+            a[0] = a[j];
+            a[j] = tmp;
+            
+            // j 最小值为1 ： 最后一个节点成为堆顶，然后在依次遍历，重新选择最大的元素
+            //  删除的时候，从根节点开始。比较的都是路上改动了的节点，因为其他支路上没动的就不会比较了。
+            BuildHeap(a, 0, j);
+        }
+    }
+    
+
+（5）、冒泡排序：相邻的两个元素进行比较，选出最大的数
+
+    void bubbleSort(int a[], int n)
+    {
+        int tmp;
+        int i ,j;
+        
+        // i 表示躺数， n-1趟
+        for(i = 0; i < n-1; i++)
+        {
+            for(j = 0; j < n - i -1; j++)
+            {
+                if(a[j] > a[j + 1])
+                {
+                    tmp = a[j];
+                    a[j] = a[j+1];
+                    a[j+1] = tmp;
+                }
+            }
+        }
+    }
+    
+（5）、1 改进，设置一标志性变量pos,用于记录每趟排序中最后一次进行交换的位置。
+        由于pos位置之后的记录均已交换到位,故在进行下一趟排序时只要扫描到pos位置即可。
+    
+    void bubbleSort(int a[], int n)
+    {
+        int i, j, tmp;
+        int pos;
+        i = n-1;
+        
+        while(i > 0)
+        {
+            pos = 0;
+            for(j = 0; j < i; j++)
+            {
+                if (r[j]> r[j+1]) 
+                { 
+                    tmp = a[j];
+                    a[j] = a[j+1];
+                    a[j+1] = tmp; 
+                    
+                    pos = j;
+                }
+            }
+            i = pos;
+        }
+    }
+    
+    
+（5）、2 改进2，正反向冒泡
+
+    void bubbleSort(int a[], int n)
+    {
+        int low = 0;
+        int high = n-1;
+        int i, j, tmp;
+        
+        while(low < high)
+        {
+            // find the max
+            for(i = low; i < high; i++)
+            {
+                if(a[i] > a[i+1])
+                {
+                    tmp = a[i];
+                    a[i] = a[i+1];
+                    a[i+1] = tmp;  
+                }
+            }
+            high--;
+            // find the min
+            for(i = high-1; i > low; i--)
+            {
+                if(a[i] < a[i-1])
+                {
+                    tmp = a[i];
+                    a[i] = a[i-1];
+                    a[i-1] = tmp;  
+                }
+            }
+            low++;
+        }
+    }
+    
+    
+    
+（6）、快速排序：初始时选择一个关键字，通常是第一个或者最后一个，所有比关键字小的都会放到左边，大的放到右边。
+                依次类推直到结束
+                
+    int partion(int a[], int low, int high)
+    {
+        int privotKey = a[low];
+        int tmp;
+        while(low < high)
+        {
+            while(low < high && a[high] >= privotKey)
+            {
+                --high;
+            }
+            tmp = a[low];
+            a[low] = a[high];
+            a[high] = tmp;
+            
+            
+            while(low < high && a[low] <= privotKey)
+            {
+                low++;
+            }
+            tmp = a[low];
+            a[low] = a[high];
+            a[high] = tmp;
+        }
+        return low;
+    }
+                
+    void quickSort(int a[], int low, int high)
+    {
+        if(low < high)
+        {
+            int pos = partion(a, low, high);
+            quickSort(a, low, pos-1);
+            quickSort(a, pos+1, high);
+        }
+    }
+    
+    
+（7）、归并排序：1 个元素的表总是有序的。所以对n 个元素的待排序列，每个元素可看成1 个有序子表。
+        对子表两两合并生成n/2个子表，所得子表除最后一个子表长度可能为1 外，其余子表长度均为2。
+        再进行两两合并，直到生成n 个元素按关键码有序的表。
+        
+    #define INT_MAX 0xFFF
+    void merge(int A[], int left, int middle, int right)
+    {
+        int n1 = middle - left + 1;     // 两个数组的大小
+        int n2 = right - middle;
+        int L[n1+1];
+        int R[n2+1];
+        for (int i = 0; i < n1; i++)    // 把两部分分别拷贝到两个数组中
+            L[i] = A[left + i];
+            
+        for (int j = 0; j < n2; j++)
+            R[j] = A[middle + j + 1];
+        
+        L[n1] = INT_MAX;                // 使用无穷大作为哨兵值放在子数组的末尾
+        R[n2] = INT_MAX;                // 这样可以免去检查某个子数组是否已读完的步骤
+        int i = 0;
+        int j = 0;
+        for (int k = left; k <= right; k++) // 依次比较两个子数组中的值，每次取出更小的那一个放入原数组
+        {
+            if (L[i] <= R[j]) 
+            {
+                A[k] = L[i];
+                i++;
+            }
+            else
+            {
+                A[k] = R[j];
+                j++;
+            }
+        }
+    }
+    
+    void mergeSort_recursion(int a[], int low, int high)
+    {
+        int mid = (low+high)/2;
+        
+        if(low < high)
+        {
+            mergeSort_recursion(a,low,mid);
+            mergeSort_recursion(a,mid+1,high);
+            merge(a,low,mid,high);
+        }
+    }
 
 4、递归、穷举、分治、回溯、贪婪、动态规划、迭代、递推

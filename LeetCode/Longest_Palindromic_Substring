@@ -1,0 +1,57 @@
+Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.
+---------
+Example:
+---------
+Input: "babad"
+
+Output: "bab"
+
+Note: "aba" is also a valid answer.
+---------
+Example:
+---------
+Input: "cbbd"
+
+Output: "bb"
+
+----------
+c++
+----------
+//从里向外来判断。也就是先判断子字符串(如dd)是不是对称的。如果它(dd)不是对称的，那么向该子字符串两端各延长一个字符得到的字符串肯定不是对称的。
+//如果它(dd)对称，那么只需要判断它(dd)两端延长的一个字符是不是相等的，如果相等，则延长后的字符串是对称的。
+// 要注意奇偶情况，由于回文串的长度可奇可偶，比如"bob"是奇数形式的回文，"noon"就是偶数形式的回文，两种形式的回文都要搜索
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int startIdx = 0, left = 0, right = 0, len = 0;
+        for (int i = 0; i < s.size() - 1; ++i) {
+            if (s[i] == s[i + 1]) {
+                left = i;
+                right = i + 1;
+                //偶数搜索
+                searchPalindrome(s, left, right, startIdx, len);
+            }
+            left = right = i;
+            // 奇数搜索
+            searchPalindrome(s, left, right, startIdx, len);
+        }
+        if (len == 0) len = s.size();
+        return s.substr(startIdx, len);
+    }
+    
+    // 搜索回文子串
+    void searchPalindrome(string s, int left, int right, int &startIdx, int &len) {
+        int step = 1;
+        // 以s[left]字符为中心，一直向左右两边搜索，直到左右尽头或者不相等
+        while ((left - step) >= 0 && (right + step) < s.size()) {
+            if (s[left - step] != s[right + step]) break;
+            ++step;
+        }
+        // 此时step已经多加了一个1。因为++step之后再去比较的。
+        int wide = right - left + 2 * step - 1;
+        if (len < wide) {
+            len = wide;
+            startIdx = left - step + 1;
+        }
+    } 
+};

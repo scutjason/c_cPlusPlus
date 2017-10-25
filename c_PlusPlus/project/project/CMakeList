@@ -1,0 +1,10 @@
+cmake_policy(SET CMP0015 NEW)
+FILE(GLOB_RECURSE SOURCE_FILES *.cxx)
+find_package(Threads REQUIRED)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+list(APPEND libs tcmalloc_minimal PocoNet PocoUtil libbasic  ${CMAKE_THREAD_LIBS_INIT})
+list(APPEND libs libssh2 ${JUNCTION_ALL_LIBRARIES})
+
+add_executable(project ${SOURCE_FILES})
+target_link_libraries(project ${libs})

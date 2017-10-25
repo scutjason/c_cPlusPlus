@@ -1,0 +1,7 @@
+set(package_name      "libbasic")
+set(package_bugreport       "")
+set(libtool_objdir     ".libs")
+
+set(libname           "libbasic")
+set(version_major          "0")
+set(version_minor          "1")

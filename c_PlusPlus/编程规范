@@ -1,0 +1,19 @@
+1、头文件.h 布局规则
+
+#ifndef xxxx_H
+#define xxxx_H
+
+#include<vector>
+#include<string
+// unordered_map与map的区别是，unordered_map是无序的
+// map中的key是有序的，不过不要重载
+#include <unordered_map>
+
+// 定义命名空间
+namespace learnCPlusPlus{
+
+}   // namespace learnCPlusPlus
+
+#endif
+
+2、

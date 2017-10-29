@@ -1,5 +1,7 @@
 1、头文件.h 布局规则
 
+包含顺序顺序：C标准库、C++标准库、其它库的头文件、你自己工程的头文件
+
 #ifndef xxxx_H
 #define xxxx_H
 
@@ -16,4 +18,112 @@ namespace learnCPlusPlus{
 
 #endif
 
-2、
+
+2、尽量减少头文件中include的数量，尤其是那些头文件被其他头文件引用的情况下，因为随便该一行就要编译很久。
+另外可以使用前置申明来减少include数量
+// date.h 
+#ifndef LEARNCPLUSPLUS_DATE_H
+#define LEARNCPLUSPLUS_DATE_H
+
+
+class Date{
+private:
+    int year, month, day;
+};
+
+#endif //LEARNCPLUSPLUS_DATE_H
+
+date.h 中有一个Date的类，现在有个task.类需要用到这个Date的类，怎么办？
+一种方法是, 在task.h中使用前置声明Date类
+// task.h
+#ifndef LEARNCPLUSPLUS_TASK_H
+#define LEARNCPLUSPLUS_TASK_H
+
+class Date; // 前置声明， 这样做的好处是，如果Date类改变了，那么task.h不需要被重新编译
+class Task{
+public:
+    Date getDate(){}
+};
+
+#endif //LEARNCPLUSPLUS_TASK_H
+
+3、在Task类不能用直接用Date去定义变量
+class Date;
+class  Task{
+public:
+    Date getDate(){}
+    Date d; // 报错，因为编译器还不知道Date类的大小，除非包含date.h，或者改成指针Date *d,因为指针大小固定4或者8字节
+};
+
+3、内联函数
+  只有十行以下的代码才考虑写成内敛函数，内联函数直接由编译器在调用处展开，节省时间，用用空间换时间
+  swich、if、递归等不适合内敛
+  
+int func(int a, int b);     // 声明时不加inline关键字，而在定义时加
+inline int func(int a, int b)
+{
+    return a + b;
+}
+
+4、函数入参顺序
+  输入参数在前、输出参数在后，输入参数为值或者常量引用、输出参数为非常量指针
+  
+5、不要把嵌套类放到public中，嵌套类是类中在定义一个类
+
+6、命名空间
+namespace ns{
+  int a;
+  const float b;
+  char *c;
+  void foo()
+  {
+    cout << "foo" <<endl;
+  }
+}
+
+使用命名空间中的变量或者函数，ns::a 双冒号。
+可以使用using ns::a, 后面用到a时就不用加ns::了
+也可以用using namespace ns; 将所有ns空间中的变量函数都引进来
+如果单纯为了封装，将不相干的函数放在一起，那还是用命名空间
+尽量不要使用全局函数
+
+7、局部变量尽量缩小作用域
+for(int i = 0 ; i < 10; i++){
+}
+
+8、class类型全局变量是被禁止的，多线程的非全局变量也是禁止的
+
+9、如果该类有虚函数，其析构函数也应该为虚函数
+派生类重定义基类的虚函数时，该派生类函数也应声明为virtual函数
+
+10、接口：没有构造函数，虚析构函数，
+
+11、一般不要重载操作符
+
+12、get、set函数，一般放在头文件中
+
+13、子类重载的虚函数也要声明virtual关键字
+
+14、智能指针
+一般用scoped_ptr
+任何情况下不用auto_ptr
+对stl容器对象，使用shared_ptr
+引用形参加上const，否则使用指针形参
+避免丑代码：（*ptr）++
+禁止使用变长数组和alloc
+使用C++风格的类型转换，除单元测试外不要使用dynamic_cast
+能用前置自增/减，不用后置自增/减
+尽量避免使用宏（c++中）
+  尽量以内联函数、枚举、常量代替之
+  不要在头文件中定义宏
+整数用0，实数0.0，指针NULL，字符串'\0'
+推荐用sizeof（varname）代替sizeof（type）
+只使用Boost中被认可的库
+
+
+15、命名规则
+不要随意缩写，除非常用约定俗成的缩写
+函数名可适当为动词，其他命名使用名词
+全部大写+下划线: 宏/枚举
+全小写+下划线: 变量（含类变量/结构体变量）、文件、命名空间、存取函数
+大小写混合: 函数/类型（类/结构体/枚举）/常量

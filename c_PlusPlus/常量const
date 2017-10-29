@@ -17,4 +17,38 @@ p = &c; // 出错 assignment of read-only variable 'p'， p 不能指向其他�
 
 
 4、修饰引用指向的变量
-const int& ra = a;  // 
+const int& ra = a;  // 引用指向的变量不能被修改
+ra++; // 错误， 不能通过引用来修改变量
+a++; // 没问题，a是变量
+
+5、修饰类的成员函数
+#include <iostream>
+using namespace std;
+class Point{
+    public :
+    Point(int _x):x(_x){}
+    
+    void c_func(int _x) const{
+        x=_x; // 错误，在const成员函数中，不能修改任何类成员变量
+        modify_x(_x); // 错误，const成员函数不能调用非onst成员函数，因为非const成员函数可以会修改成员变量
+    }
+
+    void modify_x(int _x){
+        x=_x;
+    }
+
+    int x;
+};
+
+6、修饰返回值
+const int * mallocA(){  // const data,non-const pointer
+    int *a=new int(2);
+    return a;
+}
+
+int main()
+{
+    const int *a = mallocA();
+    ///int *b = mallocA();  // 编译错误， 返回值也必须赋给const data,non-const pointer
+    return 0;
+}

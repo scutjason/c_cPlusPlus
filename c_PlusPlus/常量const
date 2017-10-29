@@ -1,0 +1,20 @@
+1、修饰普通变量，表示变量不能被修改
+const int a = 2;  
+a++;   //出错 increment of read-only variable 'c_a'
+
+2、修饰指针指向的变量
+const int *p = a; // p指向的内容是无法被改变的
+int b = 1;
+p = &b;           // p也可以指向非常量
+b++;   // b本身++是没毛病的，b等于2
+*p++;  // 输出是2，不会变成3，因为指针指向的值无法被改变
+
+3、修饰指针本身
+int * const p1 = &b;  // 指针本身p1，指向的内存地址不能变，
+b++;  // b不是常量，++是允许的
+int c = 3;
+p = &c; // 出错 assignment of read-only variable 'p'， p 不能指向其他地址
+
+
+4、修饰引用指向的变量
+const int& ra = a;  // 

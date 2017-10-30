@@ -1,0 +1,21 @@
+1、直接看怎么用， operate和运算符一起
+// .h头文件
+class A
+{
+public:
+    A operator+(A&);
+    
+private:
+    int data;
+};
+
+
+// .cc
+//成员函数的形式
+A A::operator+(A &a)
+{
+ return A(data+a.data);
+}
+
+2、IO流
+    

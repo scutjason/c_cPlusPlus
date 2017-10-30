@@ -1,1 +1,39 @@
-1、
+1、所谓智能指针就是不必用new和delete，而直接用智能指针申请内存、且自动释放
+    实现原理：将基本类型指针封装为类对象指针（这个类肯定是个模板，以适应不同基本类型的需求），
+              并在析构函数里编写delete语句删除指针指向的内存空间。
+              
+2、常见的智能指针有 std::auto_ptr、boost::shared_ptr、boost::scoped_ptr
+        auto_ptr 是c98标准，c11已经移除
+            用法：std::auto_ptr<MyClass>m_example(new MyClass()); 
+                  
+                  或者
+                  std::auto_ptr<MyClass>m_example(new MyClass(1));  
+                  // 用reset来重新拥有另一个新对象
+                  // 注意reset后，MyClass(1)会自动释放
+                  m_example.reset(new MyClass(2));  
+            缺点：因为auto_ptr是没有带引用计数的，就是说指针的托管权是会转移。 例如在上例中，
+                    如果 auto_ptr<TC> pTC(new TC);   auto_ptr<TC> pTC1=pTC; 
+                    那么， pTC1 将拥有该指针，而pTC没有了，如果再用pTC去引用，必然导致内存错误。 
+                  
+        boost::shared_ptr 建议在STL容器中使用, 加入了引用计数，专门用于共享
+            #include<boost/smart_ptr.hpp>
+            using namespace boost;
+            用法：
+                shared_ptr<int> sp(new int(10)); //一个指向整数的shared_ptr    
+                assert(sp.unique()); //现在shared_ptr是指针的唯一持有者     
+                shared_ptr<int> sp2 = sp; //第二个shared_ptr,拷贝构造函数     
+                assert(sp == sp2 && sp.use_count() == 2); //两个shared_ptr相等,指向同一个对象,引用计数为2    
+                *sp2 = 100; //使用解引用操作符修改被指对象    
+                assert(*sp == 100); //另一个shared_ptr也同时被修改     
+                sp.reset(); //停止shared_ptr的使用    
+                assert(!sp); //sp不再持有任何指针(空指针) 
+            
+        boost::scoped_ptr 独享的智能指针，没有release()方法，也不能=赋值重载
+            能保证在离开作用域之后它所管理对象能被自动释放
+            用法：
+                #include <boost/smart_ptr.hpp> 
+                using namespace boost;
+                scoped_ptr<int> p(new int);
+                p.reset();//make p null
+                assert(p == 0);  
+3、

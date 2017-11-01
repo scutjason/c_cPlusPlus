@@ -1,2 +1,95 @@
-1、
-http://www.jb51.net/article/55863.htm
+
+1、单例模式：保证一个类只有一个实例，并提供一个访问它的全局访问点。
+首先，需要保证一个类只有一个实例；在类中，要构造一个实例，就必须调用类的构造函数，
+如此，为了防止在外部调用类的构造函数而构造实例，需要将构造函数的访问权限标记为protected或private，
+但是将构造函数设为private后，怎么去访问呢？当然是有办法滴，办法就是，我们定义一个public的static 静态成员函数
+这个静态成员函数属于整个类，可以通过 类名:: 被外部调用，返回的是一个static 静态的类实例引用即可
+
+
+// 双重判断+lock，保证线程安全
+class Singleton
+{
+public:
+    static Singleton* getInstance()
+    {
+        if (instance == NULL)
+        {
+            lock();     // 大数据量下仍然有性能瓶颈
+            if (instance == NULL)
+            {
+                instance = new Singleton();
+            }
+            unlock();
+        }
+        return instance;
+    }
+    
+    static void DestoryInstance()
+    {
+        if (m_Instance != NULL )
+        {
+            delete m_Instance;
+            m_Instance = NULL ;
+        }
+    }
+    
+private:
+    Singleton(){}
+    static Singleton *m_Instance;
+}
+Singleton *Singleton ::m_Instance = NULL;
+
+
+
+// 外部初始化，在主线程调用之前
+class Singleton
+{
+public:
+    static Singleton *GetInstance()
+    {
+        return const_cast <Singleton *>(m_Instance);
+    }
+ 
+    static void DestoryInstance()
+    {
+        if (m_Instance != NULL )
+        {
+            delete m_Instance;
+            m_Instance = NULL ;
+        }
+    }
+ 
+private:
+    Singleton(){}
+    static const Singleton *m_Instance;
+};
+// 先new出来，就不用锁了
+const Singleton *Singleton ::m_Instance = new Singleton();
+
+
+
+// 3 不用new就不怕忘记delete，直接用静态对象
+class Singleton
+{
+public:
+    static Singleton *GetInstance()
+    {
+        static Singleton m_Instance;
+        return &m_Instance;
+    }
+
+private:
+    Singleton(){};
+
+};
+
+
+int main(int argc , char *argv [])
+{
+    // 带类限定符访问static成员
+    Singleton *singletonObj = Singleton::GetInstance();
+    cout<<singletonObj->GetTest()<<endl;
+ 
+    singletonObj = Singleton::GetInstance();
+    cout<<singletonObj->GetTest()<<endl;
+}

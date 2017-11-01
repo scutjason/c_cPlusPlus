@@ -18,6 +18,122 @@ A A::operator+(A &a)
 }
 
 2、IO流
-http://www.cnblogs.com/jikexianfeng/articles/5651661.html
-http://blog.csdn.net/u010177286/article/details/46831579
-    
+IO流有三种，iostream(控制台输入输出)、fstream(文件输入输出)、sstream(字符串输入输出)
+
+先看iostream，基本的关系是这样。
+
+    istream   ostream
+        \      /
+         \    /
+        iostream
+
+iostream继承istream和ostream，iostream中有三个标准输入输出流
+cin     从外设中读入数据
+cout    将输出输出到外设
+cerr    导出错误信息，向屏幕写数据
+流运算符输出<< 和 输入>> ，是iostream库中进行了重载的。
+因为默认执行标准输出设备，且返回的是引用，
+所以可以连续使用 cout<<"http://www.cppblog.com/andxie99"<<"白纸人生"
+
+如果自己的库想用，就必须要重载
+istream& operator >> (istream &,  MyClass &);
+ostream& operator << (ostream &,  MyClass &);
+运算符重载时，只能重载为类的友元函数和普通函数
+这里说下友元函数fread，就是一个类外函数，不过可以通过它访问类的成员(包括私有和保护成员)
+友元函数是类内声明，类外实现，访问时要带上对象名和.号来访问成员变量
+endl、flush、ends都有刷缓存的作用
+
+在看文件流fstream
+
+    istream   ostream
+       / \      /\
+      /   \    /  \
+ifstream iostream ofstream
+            |
+            |
+         fstream
+         
+从图上看出，ifstream和ofstream是直接继承了istream和ostream
+而fstream则是继承了iostream
+
+oftream myWrite("c:\txt", ios::out|ios::trunc|ios::app, 0) 
+// 最后一个参数是打开文件的属性，
+// ios::out表示 myWrite是输出方式
+
+// 本来 iostream 中<< 是输出到控制台的，现在在fstream中是输出到文件
+myfile<<"白纸人生"<<endl<<"网址："<<"www.cppblog.com/andxie99"<<endl; 
+myWrite.close();     
+
+
+ifstream myfile;
+myfile.open("c:\\1.txt",ios::in,0); 
+char ch; 
+string content; 
+// 利用get从文件中读取有效字符，put()输出到控制到
+while(myfile.get(ch)) 
+{ 
+    content+=ch; 
+    cout.put(ch);//cout<<ch;这么写也是可以的 
+}
+ myfile.close(); 
+
+最后是sstream
+// 串流的输入，将串流输到变量
+istrstream is(name,arraysize);
+is>>temp;
+
+// 串流的输出，即输出到串流
+ostrstream::ostr(char *_Ptr,int streamsize,int Mode = ios::out);
+ostr<<arraysize<<ends;//使用ostrstream输出到流对象的时候,要用ends结束字符串 
+
+---
+不要急，还有一个C++ 提供的另一个字串型的串流
+stringstream 
+
+#include <sstream>
+stringstream ostr("ccc");
+ostr.put('d');
+ostr<<"fg"; // 双箭头指向谁就是去谁那
+>>>dfgc 顺序输入，串流嘛
+ostr>>a;
+>>>d 第一个 
+
+
+stringstream类的对象我们还常用它进行string与各种内置类型数据之间的转换
+ostr.clear(); // 清除串流。如果在多次转换中使用同一个stringstream对象
+string s;
+ostr.str(s); // string 转成串流
+string gstr = ostr.str();  // 串流转成string
+
+
+在多次转换中重复使用同一个stringstream（而不是每次都创建一个新的对象）对象最大的好处在于效率。
+stringstream对象的构造和析构函数通常是非常耗费CPU时间的。
+
+用模板实现to_string()函数
+将t转换为字符串并写入result中。使用str()成员函数来获取流内部缓冲的一份拷贝：
+
+template<class T>
+void to_string(string & result,const T& t)
+{
+    ostringstream oss;//创建一个流
+    oss<<t;//把值传递如流中
+    result=oss.str();//获取转换后的字符转并将其写入result
+}
+
+这样，你就可以轻松地将多种数值转换成字符串了：
+to_string(s1,10.5);//double到string
+to_string(s2,123);//int到string
+to_string(s3,true);//bool到string
+
+
+template<class out_type, class in_value>
+out_type convert(const in_value & t)
+{
+    stringstream stream;
+    stream<<t;//向流中传值
+    out_type result;//这里存储转换结果
+    stream>>result;//向result中写入值
+    return result;
+}
+
+stringstream通常是用来做数据转换的。比如int转string，char* 转string

@@ -1,5 +1,41 @@
-string
-
+string 字符串
+    #include <string>
+    // 申明
+    string s; // 默认初始化为空字符串
+    string s[10]; //string 对象 
+    string s("hello string"); // 初始化s为 "hello string"
+    string s2(s); // s2是s的副本
+    string s3(s); // s3是s的副本
+    string s4 = "hello" // 拷贝初始化
+    string s5(3,'c'); // ccc
+    
+    char a[] = "1234";
+    string s1(a, 2);  // 取a的前两个
+    >>>12
+    
+    string s10="qweqweqweq";
+    string s9(s8,2);//从s8的第二个字符开始拷贝，不能超过s8的size
+    >>>eqweqweq
+    
+    
+    // 特性
+    string str = "hello string";
+    str.capacityy(); 
+    str.size();
+    str.length(); //都可以返回字符串的长度
+    npos = -1
+    str != s10 // 字符串比较
+    str.substr(startPos, n); // 从startPost开始的n个字符串
+    
+    //  查找
+    str.find()
+    
+    http://blog.csdn.net/yzl_rex/article/details/7839379
+    http://www.cnblogs.com/xFreedom/archive/2011/05/16/2048037.html
+    http://blog.csdn.net/tengfei461807914/article/details/52203202
+    
+    
+    
 vector
 
 map

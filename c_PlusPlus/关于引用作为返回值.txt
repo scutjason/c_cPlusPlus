@@ -1,0 +1,114 @@
+1、不能将局部变量作为引用返回
+
+string & get_str(string ){
+    string str = "hello world"; 
+    return str;
+}
+test.cpp:27: 警告：返回了对局部变量的‘str’的引用
+
+2、不要将局部指针返回为引用，不建议，怕忘记释放
+
+string & get_str(string s){
+    string *pstr = new string(s);
+    return *pstr;
+}
+
+string &rstr = get_str("hello world");
+cout << rstr <<endl;
+rstr = "hello ";
+cout << rstr << endl;
+    
+>>>hello world
+>>>hello 
+编译器本身不会报错，只是有风险memory leek
+
+3、不要将类的私有成员变量作为引用返回，不会报错
+但是不建议这么做，因为这样就将私有成员暴露了
+
+template <class T>  class Base
+{
+public :
+    Base(T x)
+    {
+        this->m_x = x;
+    }
+
+    T& GetX( )
+    {
+        return this->m_x;
+    }
+    
+    T SetX(int x)
+    {
+        this->m_x = x;
+    }
+private :
+    T m_x;
+};
+
+Base<std::string > base("a");
+cout <<base.GetX( ) <<endl;
+>>>a
+base.GetX( ) = "b";
+cout <<base.GetX( ) <<endl;
+>>>b
+string &x = base.GetX( );
+x = "c";
+cout <<base.GetX( ) <<endl;
+>>>c
+
+我们看到如果返回私有成员的引用，那么就能直接修改了，太危险
+
+有人说不加引用不就行了？直接返回一份复制拷贝的string，这样是可以行，不过效率太低
+加入引用本身就是提高效率，有没有其他办法能返回引用，还不被修改，那就是const
+
+template <class T>  class Base
+{
+public :
+    Base(T x)
+    {
+        this->m_x = x;
+    }
+
+    cosnt T& GetX( )
+    {
+        return this->m_x;
+    }
+    
+    T SetX(int x)
+    {
+        this->m_x = x;
+    }
+private :
+    T m_x;
+};
+
+
+Base<std::string > base("a");
+cout <<base.GetX( ) <<endl;
+>>>a
+base.GetX( ) = "b";  // [Error] assignment of read-only location 'base.Base::GetX()'  
+cout <<base.GetX( ) <<endl;
+>>>b
+string &x = base.GetX( ); // [Error] invalid initialization of reference of type 'int&' from expression of type 'const
+x = "c"; 
+cout <<base.GetX( ) <<endl;
+>>>c
+
+这样就起到了包含私有成员变量的作用
+
+4、如果将引用作为参数呢？
+
+void change_str(string &s){
+    s += " jason";
+    return ;
+}
+
+string str = "hello";
+string &rstr1 = str; // 先初始化引用
+change_str(rstr1);  // 一般是作为出参，如果是入参的话，要加const，这样提交效率
+change_str(str);    // 当然也可以直接传变量进去，引用只是一个名字，代号而已
+cout << rstr1<< endl;
+>>>hello jason jason
+
+

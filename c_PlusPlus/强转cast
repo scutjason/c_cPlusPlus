@@ -1,1 +1,40 @@
-1、
+
+c++有四种强转方法，static_cast, dynamic_cast, const_cast, reinterpret_cast
+
+1、 static_cast
+    
+    能实现c++内置的数据类型转换
+    int c=static_cast<int>(7.987);
+    
+    还能实现基类对象强转成继承类
+    class A
+    {};
+    class B:public A
+    {};
+
+    A* a=new A;
+    B* b;
+    b=static_cast<B>(a);
+    
+2、const_cast 仅仅把一个它作用的表达式转换成常量，当然也可以把const属性去掉。
+    
+    const string & get_str(const string &s){
+        string *pstr = new string(s);
+        return *pstr;
+    }
+    string &rstr = const_cast<string &>(get_str("hello world")); // 将const属性去掉
+    
+3、reinterpret_cast 
+    c风格的强转，一般不使用，不安装，没啥限制
+    
+4、dynamic_cast
+    不能用于内置的基本数据类型的强制转换。
+    如果A是基类、B是A的继承类，基类中一定要有虚函数才能进行转换，且转换失败返回NULL
+    A*  ab = new B;
+    A*  aa = new A;
+    B*  b;
+    b = dynamic_cast<B*>(ab); // 可以将原本是A指向的B的对象转换成B指针
+    b = (B*)(ab);
+    b = (B*)(aa);
+    b = dynamic_cast<B*>(aa); //  b = NULL
+

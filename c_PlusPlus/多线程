@@ -1,1 +1,85 @@
-1、
+原子操作：c11中采用了boost中的atomic
+    //Boost
+    #include <boost/atomic.hpp> 
+    Using namespace boost;
+    //C++11
+    #include <atomic>
+    using namespace std;
+
+    原子操作数最好在初始化时赋值
+    主要有以下几个
+    std::atomic_flag lock = ATOMIC_FLAG_INIT;   bool类型
+
+    // atomically sets the flag to true and obtains its previous value
+    // 如果lock被设置了，那么返回true，如果没被设置则将标记设置，返回false
+    lock.test_and_set()    
+
+    // 清除标记
+    lock.clear();
+
+    atomic是一个模板类
+    std::atomic对int, char, bool等数据结构进行原子性封装
+    std::atomic<int> foo(0);
+    foo++;  线程安全 
+    还有load 和store相对应，读取被封装的值
+    atomic_flag() 结合使用可以形成自旋锁的效果
+
+
+
+互斥 <mutex>
+    #include <mutex>
+    Class Mutex
+    {
+    Public:
+        Void lock(); //锁定，否则阻塞
+        Void unlock(); // 解锁
+        Bool try_lock(); //尝试锁定，但不会阻塞
+        Bool try_lock_for(const duration &rel_time); //timed_ 特有，阻塞一段时间后尝试锁定
+        Bool try_lock_until(const time_point &t);// timed_ 特有，阻塞一段时间后尝试锁定
+    };
+
+    mutex mutex_thread_1; 
+
+    基本用法
+    mutex_thread_1.lock();  
+    cout << "Do Something" << endl;  
+
+    mutex_thread_1.unlock();  
+
+
+
+
+多线程
+    通过全局函数创建线程
+    #include <thread>
+    void output(int i)
+    {
+        cout << i << endl;
+    }
+    int main()
+    {
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            // 只要创建一个std::thread对象，就会启动一个线程
+            thread t(output, i); // output是执行函数，i是入参
+            t.detach(); // 从main中剥离，单独执行，不过一般使用join
+        }
+        getchar();
+        return 0;
+    }
+
+    通过函数对象创建线程，推荐
+    thread   t1{Counter(1, 20)};
+    
+    Counter    c(1, 20);
+    thread t2(c)
+    
+    thread   t3(Counter(1,20));
+    
+    
+    
+    
+   
+    
+    // 自己实现线程类
+    http://blog.chinaunix.net/uid-28580999-id-5715948.html 

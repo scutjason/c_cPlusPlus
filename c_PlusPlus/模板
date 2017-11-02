@@ -1,1 +1,77 @@
-1、
+模板主要有两种，函数模板和类模板
+模板主要是参数多态化的一种模式，
+
+函数模板针对参数类型不同的函数
+template<class 形参, class 形参>返回类型 函数名(参数列表)
+{
+    函数体
+}
+比如：
+template <class T> T myswap(T &a, T &b) 
+{
+    T p;
+    p= a;
+    a = b;
+    b = p;
+    return 0;
+}
+
+    int ia = 1;
+    int ib = 2;
+    int ic = myswap<int>(ia,ib); // 调用方法
+    cout << ic <<endl;
+    cout << ia <<endl;
+    cout << ib << endl;
+>>>0
+>>>2
+>>>1
+
+
+    
+类模板针对数据成员和成员函数类型不同的类
+template<class 形参名> class 类名
+{
+}
+
+比如
+template <class T> class MyClass
+{
+public:
+    void func(T a)
+    {
+        cout << "func" << endl;
+        return;
+    }
+    
+    T foo();
+
+private:
+    T val;
+};
+
+    int val =1;
+    MyClass<int> myclass;
+    myclass.func(val);
+>>>func 1
+
+// 类外定义成员函数
+template <class T> T MyClass<T>::foo()
+{
+    return;
+}
+
+还有个知识点：非类型形参
+
+template<class type,int width> class A{}
+int width 就是非类型模板参数
+
+非类型形参在模板的内部是常量，且只能是整型，指针和引用
+sizeof表达式的结果是一个常量表达式，也可以
+int b = 1;
+A<int, b> m; //错误，因为b不是常量
+
+const int b = 1;
+A<int, b> m; //正确，没问题，b是常量
+
+
+

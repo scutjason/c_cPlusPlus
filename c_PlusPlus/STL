@@ -26,20 +26,120 @@ string 字符串
     npos = -1
     str != s10 // 字符串比较
     str.substr(startPos, n); // 从startPost开始的n个字符串
+    str.substr(startPos);    // 从startPost开始,直到结尾
     
     //  查找
-    str.find()
+    string key = "hello";
+    found = str.find(key, size_t pos = 0); // 返回hello在str中第一次出现的索引位置
+    if (found!=std::string::npos)
+        std::cout << "first 'needle' found at: " << found << '\n';
+        
+    found = str.rfind(key); // 返回hello在str中最后一次次出现的索引位置
     
-    http://blog.csdn.net/yzl_rex/article/details/7839379
-    http://www.cnblogs.com/xFreedom/archive/2011/05/16/2048037.html
-    http://blog.csdn.net/tengfei461807914/article/details/52203202
+    find_first_of(args) 第一次出现在args中的位置
+    例子：
+    string str1 ("Please, replace the vowels in this sentence by asterisks.");
+    int found = str1.find_first_of("aeiou");
+    while (found != std::string::npos){
+        str1[found] = '*';
+        found = str1.find_first_of("aeiou", found+1);
+    }
+    std::cout << str1 << '\n';
+    >>>Pl**s*, r*pl*c* th* v*w*ls *n th*s s*nt*nc* by *st*r*sks.
+    
+    find_first_not_of 第一次没有在args中的位置
+    例子：
+    std::string str2 ("look for non-alphabetic characters...");
+    std::size_t found2 = str2.find_first_not_of("abcdefghijklmnopqrstuvwxyz ");
+    if (found2!=std::string::npos)
+    {
+        std::cout << "The first non-alphabetic character is " << str2[found2];
+        std::cout << " at position " << found2 << '\n';
+    }
+    >>>The first non-alphabetic character is - at position 12
+    
+    
+    // 转换
+    const char *c_str()const;//返回一个以null终止的c字符串
+    to_string(val)	把val转换成string
+    
+    // 索引
+    str.at(nPos); // 返回str在nPos位置的字符 用[]效果一样
+    
+    // 迭代
+    std::string str ("Test string");
+    for ( std::string::iterator it=str.begin(); it!=str.end(); ++it)
+        cout << *it;
+    cout << endl;
+    >>>Test string
+        迭代支持+-操作，返回第几个字符
+        
+    // 替换
+    std::string base="this is a test string.";
+    std::string str2="n example";
+    str.replace(9,5,str2); // 用str2替换，str中从第9个位置起，一共5个字符
+    >>>this is an example string.
+    
+    str.replace(str.begin()+9,str.end()-8,str2); // 用迭代的方式
+    >>>this is an example string.
+    
+    // 插入
+    str.insert(pos,str1)//在str的pos位置插入str1
+    
+    string str = "to be, not to be: that is the question";
+    it = str.insert(str.begin()+5,','); 
+    >>>to be, not to be: that is the question
+    
+    // 删除
+    str.erase(10,8); // 直接指定删除的字符串位置第十个后面的8个字符
+    >>>to be not hat is the question
+    
+    str.erase(str.begin()); // 删除迭代器指定位置的字符
+    >>>o be not to be: that is the question
+    
     
     
     
 vector
+    #include <vector>
+    using namespace std;
+    
+    // 声明
+    vector <int> vi;
+    vi.push_back(5); // 在数组的最后添加一个数据
+    vi.pop_back();  // 将数组最后一个输出移除
+    vi.begin();     // vector的第一个元素的迭代指针
+    vi.end();       // vector的最后一个元素的迭代指针
+    vi.size();      // vector的大小
+    vi.erase(vi.begin()+5);     // 删除第5个元素
+    vi.empty();     // 是否为空
+    vi.clear();     // 清空
+    vi.insert(myvector.begin()+5, 200); // 指定位置插入200
 
 map
+    #include <map>
+    
+    // 声明
+    std:map<int,string> myMap; // key是int型，value是string型
+    
+    // 插入
+    myMap.insert(pair<int, string>(1, "student_one"));  // pair是模板
+    pair<map<int, string>::iterator, bool> result = myMap.insert(map<int, string>::value_type(2, "student_two"));
+    
+    myMap.insert(map<int, string>::value_type (3, "student_three"));  //用value_type
+    
+    mapStudent[4] = "student_for";  // 数组方式
 
+    // 大小
+    int size = myMap.size()
+    
+    // 遍历
+    map<int, string>::iterator iter;
+    for (iter = myMap.begin(); iter != myMap.end(); iter++)
+        cout << iter.first << iter.second << endl;
+    
+
+    
 hashtable
 
 hashmap
